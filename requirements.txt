@@ -1,0 +1,5 @@
+Django==3.1.7
+djangorestframework==3.12.2
+PyJWT==2.0.1
+marshmallow==3.10.0
+mysqlclient==2.0.3
