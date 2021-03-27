@@ -2,8 +2,6 @@
  
 For setup the project [clone](https://github.com/R1408/Radix_Task2.git) or Download the [zip](https://codeload.github.com/R1408/Radix_Task2/zip/refs/heads/development) file.
 
-If you donwload ZIP file then extract it. 
-
 Create a virtual environment with python 3.7
 
 Activate virtual environment if it is not actived
