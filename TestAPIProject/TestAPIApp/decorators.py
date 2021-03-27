@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from .utils import *
 import json
 import logging
+from marshmallow.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ def login_required(f):
     @wraps(f)
     def token_validator(request, *args, **kwargs):
         token = request.headers.get('Authorization')
-        logger.error('token is: {token}'.format(token=token))
+        logger.error(F'token is: {token}')
         if not token:
             return HttpResponse(json.dumps(HttpErrorHandler.bad_request_error()), content_type="application/json")
         try:
@@ -24,3 +25,23 @@ def login_required(f):
         return f(request, *args, **kwargs)
 
     return token_validator
+
+
+def validate_api_payload(schema_class):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(request, *args, **kw):
+            try:
+                schema = schema_class()
+                payload = schema.dump(schema.load(request.data))
+                kw = {**payload, **kw}
+            except ValidationError as e:
+                logger.error(F'Validation Error: {e.messages}')
+                error = HttpErrorHandler.bad_request_error()
+                error['message'] = e.messages
+                return HttpResponse(json.dumps(error), content_type="application/json")
+            return f(*args, **kw)
+
+        return wrapper
+
+    return decorator

@@ -36,44 +36,18 @@ class HttpErrorHandler:
         return HttpErrorHandler.make_error_response(404, "NOT_FOUND_ERROR", "User id is not found")
 
     @staticmethod
-    def application_error():
-        return HttpErrorHandler.make_error_response(500, "SERVER_ERROR",
-                                                    "Something went wrong while processing this request")
-
-    @staticmethod
     def invalid_authentication():
         return HttpErrorHandler.make_error_response(401, "INVALID_AUTHENTICATION", "Oops! Couldn't find your account.")
 
     @staticmethod
     def bad_request_error():
-        return HttpErrorHandler.make_error_response(400, "BAD_REQUEST",
-                                                    "Missing token found while processing the request.")
-
-    @staticmethod
-    def insufficient_permission_error():
-        return HttpErrorHandler.make_error_response(403, "INSUFFICIENT_PERMISSION",
-                                                    "Insufficient permission on this Account")
-
-    @staticmethod
-    def invalid_email():
-        return HttpErrorHandler.make_error_response(400, "INVALID_EMAIL",
-                                                    "Please Enter valid Email")
-
-    @staticmethod
-    def invalid_password():
-        return HttpErrorHandler.make_error_response(400, "INVALID_PASSWORD",
-                                                    "Password should be minimum 8 character")
+        return HttpErrorHandler.make_error_response(400, "BAD_REQUEST", "")
 
     @staticmethod
     def user_already_exist():
         return HttpErrorHandler.make_error_response(409, "USER_ALREADY_EXIST",
                                                     "User already exists. Please sign in with your credentials")
 
-
-user_details_response = {
-    "ok": True,
-    "details": fields.Raw(default={})
-}
 
 user_list_response = {
     "ok": True,

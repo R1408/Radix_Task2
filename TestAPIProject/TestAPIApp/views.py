@@ -1,9 +1,5 @@
 import datetime
 import json
-import os
-import re
-
-import jwt
 from django.db.models import Q, Value
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -12,21 +8,19 @@ from .utils import *
 from .models import *
 from django.db.models.functions import Concat
 from .decorators import *
+from .schema import *
 
 
 @api_view(['POST'])
-def authenticate_user(request):
+@validate_api_payload(LoginUserSchema)
+def authenticate_user(**kwargs):
     """
     Authenticate the user
     :param request: get the email and password from request payload and generate JWT taken
     :return: JWT token
     """
-    email = request.data["email"]
-    password = request.data['password']
-    if not re.match(r"(^([^\s@]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,})$)", email):
-        return HttpResponse(json.dumps(HttpErrorHandler.invalid_email()), content_type="application/json")
-    if not re.fullmatch(r'[A-Za-z0-9@#$%^&+=]{8,}', password):
-        return HttpResponse(json.dumps(HttpErrorHandler.invalid_password()), content_type="application/json")
+    email = kwargs["email"]
+    password = kwargs['password']
     data = Users.objects.filter(Q(email=email) & Q(password=encode_string(password)))
     if not data:
         return HttpResponse(json.dumps(HttpErrorHandler.invalid_authentication()), content_type="application/json")
@@ -41,21 +35,18 @@ def authenticate_user(request):
 
 @api_view(['POST'])
 @login_required
-def create_user(request):
+@validate_api_payload(RegisterUserSchema)
+def create_user(**kwargs):
     """
     Create account of user
     :param request: get the user data from request payload
     :return: success message if user has created account otherwise throw error
     """
-    first_name = request.data['first_name']
-    last_name = request.data['last_name']
-    email = request.data['email']
-    password = request.data['password']
+    first_name = kwargs['first_name']
+    last_name = kwargs['last_name']
+    email = kwargs['email']
+    password = kwargs['password']
 
-    if not re.match(r"(^([^\s@]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,})$)", email):
-        return HttpResponse(json.dumps(HttpErrorHandler.invalid_email()), content_type="application/json")
-    if not re.fullmatch(r'[A-Za-z0-9@#$%^&+=]{8,}', password):
-        return HttpResponse(json.dumps(HttpErrorHandler.invalid_password()), content_type="application/json")
     if Users.objects.values("id").filter(email=email):
         return HttpResponse(json.dumps(HttpErrorHandler.user_already_exist()), content_type="application/json")
 
@@ -71,9 +62,8 @@ def user_details(request):
     """
     if we get user id in request payload, get the user details using user_id
     user can search or filter using email property
-    get the pagination data (page and limit) from query string. if we don't receive any parameter then default users
+    :param request: get the pagination data (page and limit) from query string. if we don't receive any parameter then default users
     limit is 10
-    :param request:
     :return: list of users based on pagination limit
     """
     page = int(request.GET.get('page', 1))
@@ -95,18 +85,22 @@ def user_details(request):
 
 @api_view(["PUT"])
 @login_required
-def update_user(request, id):
+@validate_api_payload(UpdateUserSchema)
+def update_user(id, **kwargs):
     """
-    Updated the user account
+    Update the user account
     :param request: get the request payload
     :param id: user id
     :return: updated request payload if user id is in our system other wise throw user is not found exception
     """
-    first_name = request.data['first_name']
-    last_name = request.data['last_name']
-    email = request.data['email']
+    first_name = kwargs['first_name']
+    last_name = kwargs['last_name']
+    email = kwargs['email']
     user = Users.objects.filter(id=int(id))
     if not user:
         return HttpResponse(json.dumps(HttpErrorHandler.resource_not_found_error()), content_type="application/json")
     user.update(first_name=first_name, last_name=last_name, email=email)
+    user_account_updated['first_name'] = first_name
+    user_account_updated['last_name'] = last_name
+    user_account_updated['email'] = email
     return HttpResponse(json.dumps(user_account_updated), content_type="application/json")
