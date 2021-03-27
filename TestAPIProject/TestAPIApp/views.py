@@ -1,13 +1,11 @@
 import datetime
-import json
+
 from django.db.models import Q, Value
-from django.http import HttpResponse
+from django.db.models.functions import Concat
 from rest_framework.decorators import api_view
 
-from .utils import *
-from .models import *
-from django.db.models.functions import Concat
 from .decorators import *
+from .models import *
 from .schema import *
 
 
@@ -70,17 +68,22 @@ def user_details(request):
     limit = int(request.GET.get('limit', 10))
     email = request.GET.get('email')
     id = request.data.get('id')
-    if id:
-        data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
-            id=id)
-    elif email:
-        data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
-            Q(id__range=[page, page + limit]) & Q(email__contains=email)).order_by('id')[:limit]
-    else:
-        data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
-            id__range=[page, page + limit]).order_by('id')[:limit]
-    user_list_response['user_list'] = list(data)
-    return HttpResponse(json.dumps(user_list_response), content_type="application/json")
+    try:
+        if id:
+            data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
+                id=id)
+        elif email:
+            data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
+                email__contains=email)
+        else:
+            data = Users.objects.values("id", "email", full_name=Concat('first_name', Value(' '), 'last_name')).filter(
+                id__range=[page, page + limit]).order_by('id')[:limit]
+        user_list_response['user_list'] = list(data)
+        return HttpResponse(json.dumps(user_list_response), content_type="application/json")
+    except:
+        error = HttpErrorHandler.bad_request_error()
+        error['message'] = "Please Enter valid details"
+        return HttpResponse(json.dumps(error), content_type="application/json")
 
 
 @api_view(["PUT"])

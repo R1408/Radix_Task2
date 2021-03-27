@@ -16,7 +16,9 @@ def login_required(f):
         token = request.headers.get('Authorization')
         logger.error(F'token is: {token}')
         if not token:
-            return HttpResponse(json.dumps(HttpErrorHandler.bad_request_error()), content_type="application/json")
+            error = HttpErrorHandler.bad_request_error()
+            error['message'] = "Missing token found while processing the request"
+            return HttpResponse(json.dumps(error), content_type="application/json")
         try:
             jwt.decode(token.split()[1], os.environ.get("JWT_SECRET_KEY", "xyz"), algorithms="HS256")
         except:
