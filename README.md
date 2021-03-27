@@ -2,9 +2,9 @@
  
 > For setup the project [clone](https://github.com/R1408/Radix_Task2.git) or Download the [zip](https://codeload.github.com/R1408/Radix_Task2/zip/refs/heads/development) file.
 
-Create a virtual environment with python 3.7
+> Create a virtual environment with python 3.7
 
-Activate virtual environment if it is not actived
+> Activate virtual environment if it is not actived
 
 ### Windows:
 ```bazaar
@@ -20,13 +20,13 @@ pip install -r requirements.txt
 ```
 
 
-Go to the TestAPIProject Directory
+> Go to the TestAPIProject Directory
 ### Windows
 ```bazaar
 cd TestAPIProject
 ```
 
-configure env file in your machine
+> configure env file in your machine
 
 
 ### Start Django Application
